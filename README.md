@@ -11,3 +11,5 @@ Fork the repository and copy the URL. Navigate into your desktop from your termi
 * git clone [URL] 
 
 Once you open the local directory on the text editor build the project localy with Gradle
+
+-WIP-
