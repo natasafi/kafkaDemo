@@ -2,17 +2,16 @@ package com.examples.kafka.demo.kafka
 
 import mu.KotlinLogging
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 private val logger = KotlinLogging.logger { }
+private const val topic: String = "natasa-topic-example"
 
-private var kafkaTemplate: KafkaTemplate<String, String>? = null
-
-@Component
-class KafkaProducer() {
+@Service
+class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, String>) {
 
     fun produceMessage(message: String) {
         logger.info { "Your message is being produced: $message" }
-        kafkaTemplate?.send("natasa-topic-example", message)
+        kafkaTemplate.send(topic, message)
     }
 }
