@@ -1,14 +1,15 @@
 package com.examples.kafka.demo.models
 
+import org.bson.types.ObjectId
 import org.jetbrains.annotations.Nullable
+import org.springframework.data.mongodb.core.mapping.Document
 import javax.persistence.Column
-import javax.persistence.Entity
 import javax.persistence.Id
 
-@Entity
-data class User (
+@Document(collection = "user")
+data class User(
     @Id
-    val id: Long,
+    val id: ObjectId = ObjectId.get(),
     @Column
     val name: String,
     @Column
