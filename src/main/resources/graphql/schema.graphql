@@ -1,9 +1,23 @@
 type Query{
     user: [User]
+    address (userId: ID!): [Address]
 }
 
 type User {
     id: ID!
     name: String
     age: Int
+}
+
+type Address {
+    userId: ID!
+    postcode: String!
+    city: String
+}
+
+type Mutation {
+    newUser(name: String!, age: Int) : User!
+    deleteUser(id: ID!) : Boolean
+    updateUser(id:ID!, age: Int) : User!
+    newAddress(userId: ID!, postcode: String!, city: String) : Address
 }
