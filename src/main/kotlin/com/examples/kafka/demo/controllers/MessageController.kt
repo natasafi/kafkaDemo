@@ -4,6 +4,8 @@ import com.examples.kafka.demo.kafka.KafkaProducer
 import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.repository.UserRepository
 import mu.KotlinLogging
+import org.bson.types.ObjectId
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,14 +24,14 @@ class MessageController(private val producer: KafkaProducer, private val userRep
     }
 
     @GetMapping("/user/{userId}")
-    fun getUser(@PathVariable userId: String): User {
+    fun getUser(@PathVariable userId: String): ResponseEntity<User> {
 
         logger.info { "Here's the id: $userId" }
 
-        val userById = userRepository.findById(userId)
+        val userById = userRepository.findByUserId(userId)
 
         logger.info { "Here's the user: $userById" }
 
-        return userById.orElseThrow()
+        return ResponseEntity.ok(userById)
     }
 }

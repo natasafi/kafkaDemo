@@ -2,9 +2,9 @@ server:
   port: 9000
 
 spring:
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  data:
+    mongodb:
+  uri: mongodb://localhost:27017/db
 
   kafka:
     consumer:
@@ -18,13 +18,3 @@ spring:
       bootstrap-servers: localhost:9093
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-  data:
-    mongodb:
-      authentication-database: admin
-      user: root
-      password: example
-      database: test_db
-      port: 27017
-      host: localhost
-#      uri: mongodb://localhost:27017/db
