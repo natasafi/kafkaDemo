@@ -21,6 +21,16 @@ class MessageController(
     private val producer: KafkaProducer,
     private val userRepository: UserRepository
 ) {
+    @GetMapping("/users")
+    fun getUsers(): ResponseEntity<List<User>> {
+
+        val users = userRepository.findAll()
+
+        logger.info { "Here's the users: $users" }
+
+        return ResponseEntity.ok(users)
+    }
+
     @GetMapping("/user/{userId}")
     fun getUser(@PathVariable userId: String): ResponseEntity<User> {
 
@@ -33,7 +43,7 @@ class MessageController(
         return ResponseEntity.ok(userById)
     }
 
-    @PostMapping(value = ["/user/postedUser"], consumes = ["application/json"], produces = ["application/json"])
+    @PostMapping(value = ["/user/postedUser"])
     fun postUserJson(@RequestBody postUser: User): String? {
 
         producer.produceMessage(postUser)
