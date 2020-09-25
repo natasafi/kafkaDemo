@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 
@@ -22,33 +23,41 @@ class MessageController(
     private val userRepository: UserRepository
 ) {
     @GetMapping("/users")
-    fun getUsers(): ResponseEntity<List<User>> {
+    fun getUsers(@RequestParam(value = "name", required = false) name: String): ResponseEntity<List<User>> {
 
         val users = userRepository.findAll()
+
+        if (name.isNotEmpty()) {
+            logger.info { "Here's the users: $users by their names" }
+
+            val usersByNames = userRepository.findUsersByName(name)
+
+            return ResponseEntity.ok(usersByNames)
+        }
 
         logger.info { "Here's the users: $users" }
 
         return ResponseEntity.ok(users)
     }
 
-    @GetMapping("/user/{userId}")
-    fun getUser(@PathVariable userId: String): ResponseEntity<User> {
+    @GetMapping("/user/{id}")
+    fun getUser(@PathVariable id: String): ResponseEntity<User> {
 
-        logger.info { "Here's the id: $userId" }
+        logger.info { "Here's the id: $id" }
 
-        val userById = userRepository.findByUserId(userId)
+        val userById = userRepository.findUserById(id)
 
         logger.info { "Here's the user: $userById" }
 
         return ResponseEntity.ok(userById)
     }
 
-    @PostMapping(value = ["/user/postedUser"])
-    fun postUserJson(@RequestBody postUser: User): String? {
+    @PostMapping(value = ["/user"])
+    fun postUserJson(@RequestBody user: User): String? {
 
-        producer.produceMessage(postUser)
+        producer.produceMessage(user)
 
-        logger.info { "Here's your posted user: $postUser" }
+        logger.info { "Here's your posted user: $user" }
 
         return "Your user was published successfully"
     }
