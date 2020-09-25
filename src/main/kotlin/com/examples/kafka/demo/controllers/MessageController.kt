@@ -24,16 +24,8 @@ class MessageController(
 ) {
     @GetMapping("/users")
     fun getUsers(@RequestParam(value = "name", required = false) name: String?): ResponseEntity<List<User>> {
-        if (name != null) {
-            if (name.isNotEmpty()) {
-                val usersNames = userRepository.findUsersByName(name)
-
-                logger.info { "Here's the users: $usersNames" }
-
-                return ResponseEntity.ok(usersNames)
-            }
-        }
-        val users = userRepository.findAll()
+        val users: List<User> =
+            name?.takeIf { it.isNotEmpty() }?.let { userRepository.findUsersByName(it) } ?: userRepository.findAll()
 
         logger.info { "Here's the users: $users" }
 
