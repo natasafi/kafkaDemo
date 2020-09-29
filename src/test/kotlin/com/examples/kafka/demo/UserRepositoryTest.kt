@@ -22,13 +22,14 @@ class UserRepositoryTest @Autowired constructor(
 
     @BeforeEach
     fun setUpRepository() {
-        userRepository.deleteAll()
+        mongoTemplate.dropCollection("user")
     }
 
     @Nested
-    inner class `When accessing GET users endpoint` {
+    inner class `Given the endpoint is accessed When GET users is requested` {
         @Test
-        fun `Then should return all users`() {
+        fun `Then it should return all users`() {
+
             // Given
             mongoTemplate.insert(createUserWithIdOf1())
             mongoTemplate.insert(createUserWithIdOf2())
@@ -46,14 +47,32 @@ class UserRepositoryTest @Autowired constructor(
 
         @Test
         fun `Then should return all users by their requested names`() {
+            // Given
+            mongoTemplate.insert(createUserWithIdOf1())
+            mongoTemplate.insert(createUserWithIdOf2())
 
+            // When
+            val actualUsers = userRepository.findUsersByName("Phillip Fry")
+
+            // Then
+            assertThat(actualUsers).isEqualTo(listOf(createUserWithIdOf2()))
         }
     }
 
     @Nested
-    inner class `When accessing POST user endpoint` {
+    inner class `When accessing GET users endpoint searching by id` {
+
         @Test
-        fun `should post a user`() {
+        fun `Then should return all users by their requested id`() {
+            // Given
+            mongoTemplate.insert(createUserWithIdOf1())
+            mongoTemplate.insert(createUserWithIdOf2())
+
+            // When
+            val actualUsers = userRepository.findUserById("1")
+
+            // Then
+            assertThat(actualUsers).isEqualTo(createUserWithIdOf1())
         }
     }
 }
