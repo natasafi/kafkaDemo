@@ -1,7 +1,6 @@
-package com.examples.kafka.demo
+package com.examples.kafka.demo.repository
 
 import com.examples.kafka.demo.models.createUser
-import com.examples.kafka.demo.repository.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,7 +37,10 @@ class UserRepositoryTest @Autowired constructor(
             val actualUsers = userRepository.findAll()
 
             // Then
-            assertThat(actualUsers).isEqualTo(listOf(createUserWithIdOf1(), createUserWithIdOf2()))
+            assertThat(actualUsers).isEqualTo(listOf(
+                createUserWithIdOf1(),
+                createUserWithIdOf2()
+            ))
         }
     }
 
