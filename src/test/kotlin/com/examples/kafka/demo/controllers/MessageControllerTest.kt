@@ -7,7 +7,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -61,12 +60,27 @@ class MessageControllerTest {
 //            assertThat(response.body).containsExactlyInAnyOrderElementsOf(users)
         }
 
+//        @Test
+//        fun shouldReturn200WhenUsersByName() {
+//            val users =
+//                listOf(User("1", "Pickle Rick", 64), User("2", "Phillip Fry", 25))
+//            // Given
+//            given(userRepository.findUsersByName("Phillip Fry")).willReturn(listOf(users[1]))
+//
+//            // When
+//            val response = restTemplate.getForEntity<List<User>>("/users?name=Phillip Fry")
+//
+//            // Then
+//            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+//            assertThat(response.body).isEqualTo(users.component2())
+//        }
+
         @Test
         fun shouldReturn200WhenUsersById() {
             val users =
                 listOf(User("1", "Pickle Rick", 64), User("2", "Phillip Fry", 25))
             // Given
-            given(userRepository.findUserById("1")).willReturn(users.component1())
+            given(userRepository.findUserById("1")).willReturn(users[0])
 
             // When
             val response = restTemplate.getForEntity<User>("/user/1")
