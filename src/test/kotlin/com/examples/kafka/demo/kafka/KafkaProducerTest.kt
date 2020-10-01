@@ -1,41 +1,64 @@
 package com.examples.kafka.demo.kafka
 
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
+import com.examples.kafka.demo.models.User
+import mu.KotlinLogging
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.kafka.listener.KafkaMessageListenerContainer
-import org.springframework.kafka.test.EmbeddedKafkaBroker
+import org.springframework.context.annotation.Import
+import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.test.context.EmbeddedKafka
-import org.springframework.kafka.test.rule.EmbeddedKafkaRule
+import org.springframework.stereotype.Component
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 
-@EmbeddedKafka
+@EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
 @ExtendWith(SpringExtension::class)
-@SpringBootTest()
+@SpringBootTest
+@Import(KafkaProducerTest.SomeListener::class)
 class KafkaProducerTest {
 
-    private val TOPIC_NAME = "natasa-topic-example"
-
-    @ExtendWith
-    var embeddedKafkaRule = EmbeddedKafkaRule(1, true, TOPIC_NAME)
+    @Autowired
+    private lateinit var producer: KafkaProducer
 
     @Autowired
-    private lateinit var embeddedKafkaBroker: EmbeddedKafkaBroker
+    private lateinit var someListener: SomeListener
 
-    @MockBean
-    private lateinit var container: KafkaMessageListenerContainer<String, String>
+    @Test
+    @DirtiesContext
+    fun publishMessage() {
+        // Given
+        val user = User("id", "name", 20)
 
-    @BeforeAll
-    fun setUp() {
+        // When
+        producer.produceMessage(user)
 
-
-    @AfterAll
-    fun tearDown() {
-        container.stop()
+        // Then
+        val messageSent: User = someListener.waitForMessage()
+        assertThat(messageSent).isEqualTo(user)
     }
 
+    @Component
+    class SomeListener {
+
+        private val latch = CountDownLatch(1)
+        private var message: User? = null
+
+        @KafkaListener(topics = ["natasa-topic-example"], groupId = "natasa-message-consumer")
+        fun consumer(user: User) {
+            KotlinLogging.logger { }.info { "Message received [$user]" }
+            message = user
+            latch.countDown()
+        }
+
+        fun waitForMessage(): User {
+            if(latch.await(5, TimeUnit.SECONDS)) return message!!
+            else throw AssertionError("Message not received")
+        }
+    }
 }
