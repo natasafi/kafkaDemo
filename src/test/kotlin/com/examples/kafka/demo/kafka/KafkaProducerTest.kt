@@ -13,8 +13,6 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.stereotype.Component
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 
 @EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
@@ -46,19 +44,22 @@ class KafkaProducerTest {
     @Component
     class SomeListener {
 
-        private val latch = CountDownLatch(1)
-        private var message: User? = null
+        private val messages = mutableListOf<User>()
 
         @KafkaListener(topics = ["natasa-topic-example"], groupId = "natasa-message-consumer")
         fun consumer(user: User) {
             KotlinLogging.logger { }.info { "Message received [$user]" }
-            message = user
-            latch.countDown()
+            messages.add(user)
         }
 
         fun waitForMessage(): User {
-            if(latch.await(5, TimeUnit.SECONDS)) return message!!
-            else throw AssertionError("Message not received")
+            var counter = 0
+            do {
+                if(messages.isNotEmpty()) return messages[0]
+                else Thread.sleep(1000)
+                counter++
+            } while(counter < 10)
+            throw AssertionError("No message was received")
         }
     }
 }
