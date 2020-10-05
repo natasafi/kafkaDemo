@@ -1,13 +1,17 @@
 package com.examples.kafka.demo.kafka
 
 import com.examples.kafka.demo.models.User
+import com.examples.kafka.demo.repository.UserRepository
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions
+import org.mockito.BDDMockito.given
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.annotation.KafkaHandler
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.stereotype.Component
@@ -26,13 +30,15 @@ class KafkaConsumerTest {
     @Autowired
     private lateinit var someProducer: SomeProducer
 
-//    @Autowired
-//    private lateinit var kafkaTemplate: KafkaTemplate
+    @MockBean
+    private lateinit var userRepository: UserRepository
 
     @Test
     fun consumeMessage() {
         // Given
         val user = User("id", "name", 20)
+
+        given(userRepository.save(any()).willReturn(user)
 
         // When
         consumer.consumeMessage(user)
@@ -47,9 +53,10 @@ class KafkaConsumerTest {
 
         private val messages = mutableListOf<User>()
 
+        @KafkaHandler
         fun producer(user: User) {
             logger.info { "Your message is produced:[$user]" }
-            kafkaTemplate.send("natasa-topic-example", user)
+            kafkaTemplate.sendDefault(user)
         }
 
         fun waitForMessage(): User {
