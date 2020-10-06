@@ -53,5 +53,4 @@ class KafkaConsumerTest {
         Mockito.verify(userRepository).save(user1)
         Mockito.verify(userRepository).save(user2)
     }
-
 }
