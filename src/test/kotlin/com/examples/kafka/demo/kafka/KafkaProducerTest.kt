@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @SpringBootTest
 @Import(KafkaProducerTest.SomeListener::class)
 class KafkaProducerTest {
-
     @Autowired
     private lateinit var producer: KafkaProducer
 

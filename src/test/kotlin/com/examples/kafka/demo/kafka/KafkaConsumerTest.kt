@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
-import org.mockito.BDDMockito.verify
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -15,34 +15,43 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.concurrent.CountDownLatch
 
+private const val TOPIC_NAME: String = "natasa-topic-example"
+
 @EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 class KafkaConsumerTest {
 
-    // Inject a real Kafka Template so we can publish messages to Kafka
     @Autowired
     private lateinit var kafkaTemplate: KafkaTemplate<String, User>
 
-    // Inject a mock UserRepository that will be used by Spring
     @MockBean
     private lateinit var userRepository: UserRepository
 
     @Test
     fun consumeMessage() {
         // Given
-        val latch = CountDownLatch(1) // Create a latch that expects to have its countDown method called once
-        val user = User("id", "name", 20)
-        given(userRepository.save(any<User>())).will { // Every time userRepository.save(...) is called this block of code will run
-            latch.countDown() // Count down the latch
-            user // Return the user
+        val latch = CountDownLatch(2)
+
+        val user1 = User("1", "Adam", 20)
+        val user2 = User("2", "Peter", 30)
+
+        given(userRepository.save(any<User>())).will {
+            latch.countDown()
+            user1
+        }.will {
+            latch.countDown()
+            user2
         }
 
         // When
-        kafkaTemplate.send("natasa-topic-example", user) // Publish a message to Kafka
+        kafkaTemplate.send(TOPIC_NAME, user1)
+        kafkaTemplate.send(TOPIC_NAME, user2)
 
         // Then
-        latch.await() // wait for the latch to be counted down by something calling userRepository.save()
-        verify(userRepository).save(user) // Verify the repository was called with the right user
+        latch.await()
+        Mockito.verify(userRepository).save(user1)
+        Mockito.verify(userRepository).save(user2)
     }
+
 }
