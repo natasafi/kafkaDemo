@@ -13,8 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.getForEntity
+import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.RequestEntity
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.net.URI
 
 @ExtendWith(SpringExtension::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -51,43 +55,51 @@ class MessageControllerTest {
             // Given
             given(userRepository.findAll()).willReturn(users)
 
+            val typeReference = object : ParameterizedTypeReference<List<User>>() {}
+            val requestEntity = RequestEntity<Any>(HttpMethod.GET, URI.create("/users"))
+
             // When
-            val response = restTemplate.getForEntity<List<User>>("/users")
+            val response = restTemplate.exchange(requestEntity, typeReference)
+
+            println("Here's that: ${response.body} ")
+            println("users :$users")
 
             // Then
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body).hasSize(2)
-//            assertThat(response.body).containsExactlyInAnyOrderElementsOf(users)
+            assertThat(response.body).containsAll(users)
         }
 
-//        @Test
-//        fun shouldReturn200WhenUsersByName() {
-//            val users =
-//                listOf(User("1", "Pickle Rick", 64), User("2", "Phillip Fry", 25))
-//            // Given
-//            given(userRepository.findUsersByName("Phillip Fry")).willReturn(listOf(users[1]))
-//
-//            // When
-//            val response = restTemplate.getForEntity<List<User>>("/users?name=Phillip Fry")
-//
-//            // Then
-//            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-//            assertThat(response.body).isEqualTo(users.component2())
-//        }
+        @Test
+        fun shouldReturn200WhenUsersByName() {
+            val users =
+                listOf(User("2", "Phillip Fry", 25))
+            // Given
+            given(userRepository.findUsersByName("Phillip Fry")).willReturn(users)
+
+            val typeReference = object : ParameterizedTypeReference<List<User>>() {}
+            val requestEntity = RequestEntity<Any>(HttpMethod.GET, URI.create("/users?name=Phillip%20Fry"))
+
+            // When
+            val response = restTemplate.exchange(requestEntity, typeReference)
+
+            // Then
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body).isEqualTo(users)
+        }
 
         @Test
         fun shouldReturn200WhenUsersById() {
-            val users =
-                listOf(User("1", "Pickle Rick", 64), User("2", "Phillip Fry", 25))
+            val user = User("100", "Pickle Rick", 64)
             // Given
-            given(userRepository.findUserById("1")).willReturn(users[0])
+            given(userRepository.findUserById("1")).willReturn(user)
 
             // When
             val response = restTemplate.getForEntity<User>("/user/1")
 
             // Then
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(response.body).isEqualTo(users.component1())
+            assertThat(response.body).isEqualTo(user)
         }
     }
 }
