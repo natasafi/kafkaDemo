@@ -20,7 +20,7 @@ private const val TOPIC_NAME: String = "natasa-topic-example"
 @EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-class KafkaConsumerTest {
+class UserConsumerTest {
 
     @Autowired
     private lateinit var kafkaTemplate: KafkaTemplate<String, User>
