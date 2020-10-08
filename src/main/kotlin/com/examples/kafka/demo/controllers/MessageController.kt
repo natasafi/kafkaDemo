@@ -1,6 +1,6 @@
 package com.examples.kafka.demo.controllers
 
-import com.examples.kafka.demo.kafka.KafkaProducer
+import com.examples.kafka.demo.kafka.user.KafkaProducer
 import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.repository.UserRepository
 import mu.KotlinLogging

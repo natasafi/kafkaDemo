@@ -1,5 +1,6 @@
 package com.examples.kafka.demo.kafka
 
+import com.examples.kafka.demo.kafka.user.KafkaProducer
 import com.examples.kafka.demo.models.User
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
