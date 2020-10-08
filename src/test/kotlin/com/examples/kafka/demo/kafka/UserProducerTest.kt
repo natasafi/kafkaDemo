@@ -19,8 +19,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-@Import(KafkaProducerTest.SomeListener::class)
-class KafkaProducerTest {
+@Import(UserProducerTest.SomeListener::class)
+class UserProducerTest {
     @Autowired
     private lateinit var producer: KafkaProducer
 
