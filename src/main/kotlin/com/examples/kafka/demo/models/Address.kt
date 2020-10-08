@@ -4,6 +4,5 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "address")
 data class Address(
-    val city: String,
-    val postcode: String
+    val city: String
 )
