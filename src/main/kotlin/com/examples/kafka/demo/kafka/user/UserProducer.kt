@@ -1,4 +1,4 @@
-package com.examples.kafka.demo.kafka
+package com.examples.kafka.demo.kafka.user
 
 import com.examples.kafka.demo.models.User
 import mu.KotlinLogging
@@ -13,6 +13,6 @@ class KafkaProducer(private val kafkaTemplate: KafkaTemplate<String, User>) {
 
     fun produceMessage(user: User) {
         logger.info { "Your message is being produced: $user" }
-        kafkaTemplate.send(TOPIC_NAME, user)
+        kafkaTemplate.send(TOPIC_NAME, user.id, user)
     }
 }
