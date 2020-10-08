@@ -61,9 +61,6 @@ class MessageControllerTest {
             // When
             val response = restTemplate.exchange(requestEntity, typeReference)
 
-            println("Here's that: ${response.body} ")
-            println("users :$users")
-
             // Then
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body).hasSize(2)
