@@ -1,6 +1,6 @@
 package com.examples.kafka.demo.controllers
 
-import com.examples.kafka.demo.kafka.user.KafkaProducer
+import com.examples.kafka.demo.kafka.KafkaProducer
 import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.repository.UserRepository
@@ -112,12 +112,11 @@ class MessageControllerTest {
 
         @Test
         fun shouldReturn200WhenNewUser() {
-            val userJSON = """{
-                "id": "2",
-                "name"
-
-: "James",
-                "age": 25
+            val userJSON = """
+                 {
+                  "id": "2",
+                  "name": "James",
+                  "age": 25
                  }"""
 
             val expectedUser = User("2", "James", 25)
