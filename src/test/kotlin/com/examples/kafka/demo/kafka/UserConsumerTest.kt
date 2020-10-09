@@ -15,9 +15,9 @@ import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.util.concurrent.CountDownLatch
 
-private const val TOPIC_NAME: String = "natasa-topic-example"
+private const val TOPIC_NAME: String = "users-topic"
 
-@EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
+@EmbeddedKafka(ports = [9093], topics = ["users-topic"])
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 class UserConsumerTest {

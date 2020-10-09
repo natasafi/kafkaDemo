@@ -1,4 +1,4 @@
-package com.examples.kafka.demo.kafka.user
+package com.examples.kafka.demo.kafka
 
 import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.repository.UserRepository
@@ -13,7 +13,7 @@ private val logger = KotlinLogging.logger { }
 @Component
 class UserConsumer(val userRepository: UserRepository) {
 
-    @KafkaListener(topics = ["natasa-topic-example"], groupId = "natasa-message-consumer")
+    @KafkaListener(topics = ["users-topic"], groupId = "natasa-message-consumer")
     fun consumeMessage(record: ConsumerRecord<String, User>) {
 
         logger.info { "Your user is safe with me: ${record.value()} with key ${record.key()}" }
