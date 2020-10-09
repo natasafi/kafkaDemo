@@ -114,7 +114,9 @@ class MessageControllerTest {
         fun shouldReturn200WhenNewUser() {
             val userJSON = """{
                 "id": "2",
-                "name": "James",
+                "name"
+
+: "James",
                 "age": 25
                  }"""
 
@@ -124,9 +126,7 @@ class MessageControllerTest {
             willDoNothing().given(producer).produceUser(expectedUser)
 
             //When
-            val request = restTemplate.postForEntity<String>(
-                "/user", HttpEntity(userJSON, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
-            )
+            val request = restTemplate.postForEntity<String>("/user", jsonEntity(userJSON))
 
             //Then
             assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
@@ -140,18 +140,16 @@ class MessageControllerTest {
         @Test
         fun shouldReturn200WhenPutAddress() {
             val addressJSON = """{"city": "Leeds"}"""
-
             val expectedAddress = Address("Leeds")
-
             val userId = "123"
 
             //Given
             willDoNothing().given(producer).produceAddress(userId, expectedAddress)
 
             //When
-            val request = restTemplate.postForEntity<String>(
-                "/user/$userId/address",
-                HttpEntity(addressJSON, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
+            val body = addressJSON
+            val request = restTemplate.exchange(
+                "/user/$userId/address", HttpMethod.PUT, jsonEntity(body), String::class.java
             )
 
             //Then
@@ -159,5 +157,8 @@ class MessageControllerTest {
             then(producer).should().produceAddress(userId, expectedAddress)
         }
     }
+
+    private fun jsonEntity(body: String) =
+        HttpEntity(body, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
 }
 
