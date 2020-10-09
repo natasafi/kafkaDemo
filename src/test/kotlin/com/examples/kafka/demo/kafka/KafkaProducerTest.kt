@@ -1,6 +1,6 @@
 package com.examples.kafka.demo.kafka
 
-import com.examples.kafka.demo.kafka.user.KafkaProducer
+import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
 import mu.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
@@ -16,20 +16,23 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 
-@EmbeddedKafka(ports = [9093], topics = ["natasa-topic-example"])
+@EmbeddedKafka(ports = [9093], topics = ["users-topic", "address-topic"])
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-@Import(UserProducerTest.SomeListener::class)
-class UserProducerTest {
+@Import(KafkaProducerTest.UserListener::class)
+class KafkaProducerTest {
     @Autowired
     private lateinit var producer: KafkaProducer
 
     @Autowired
-    private lateinit var someListener: SomeListener
+    private lateinit var usersListener: UserListener
+
+    @Autowired
+    private lateinit var addressListener: AddressListener
 
     @Test
     @DirtiesContext
-    fun publishMessage() {
+    fun publishUserMessage() {
         // Given
         val user = User("id", "name", 20)
 
@@ -37,12 +40,26 @@ class UserProducerTest {
         producer.produceUser(user)
 
         // Then
-        val messageSent: User = someListener.waitForMessage()
+        val messageSent: User = usersListener.waitForMessage()
         assertThat(messageSent).isEqualTo(user)
     }
 
+    @Test
+    @DirtiesContext
+    fun publishAddressMessage() {
+        // Given
+        val address = Address("Leeds")
+
+        // When
+        producer.produceAddress("1", address)
+
+        // Then
+        val messageSent: Address = addressListener.waitForMessage()
+        assertThat(messageSent).isEqualTo(address)
+    }
+
     @Component
-    class SomeListener {
+    class UserListener {
 
         private val messages = mutableListOf<User>()
 
@@ -55,10 +72,32 @@ class UserProducerTest {
         fun waitForMessage(): User {
             var counter = 0
             do {
-                if(messages.isNotEmpty()) return messages[0]
+                if (messages.isNotEmpty()) return messages[0]
                 else Thread.sleep(1000)
                 counter++
-            } while(counter < 10)
+            } while (counter < 10)
+            throw AssertionError("No message was received")
+        }
+    }
+
+    @Component
+    class AddressListener {
+
+        private val messages = mutableListOf<Address>()
+
+        @KafkaListener(topics = ["address-topic"], groupId = "natasa-message-consumer")
+        fun consumer(address: Address) {
+            KotlinLogging.logger { }.info { "Message received [$address]" }
+            messages.add(address)
+        }
+
+        fun waitForMessage(): Address {
+            var counter = 0
+            do {
+                if (messages.isNotEmpty()) return messages[0]
+                else Thread.sleep(1000)
+                counter++
+            } while (counter < 10)
             throw AssertionError("No message was received")
         }
     }
