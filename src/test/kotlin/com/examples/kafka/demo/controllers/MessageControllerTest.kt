@@ -1,6 +1,7 @@
 package com.examples.kafka.demo.controllers
 
 import com.examples.kafka.demo.kafka.user.KafkaProducer
+import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.repository.UserRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -120,7 +121,7 @@ class MessageControllerTest {
             val expectedUser = User("2", "James", 25)
 
             //Given
-            willDoNothing().given(producer).produceMessage(expectedUser)
+            willDoNothing().given(producer).produceUser(expectedUser)
 
             //When
             val request = restTemplate.postForEntity<String>(
@@ -129,33 +130,34 @@ class MessageControllerTest {
 
             //Then
             assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
-            then(producer).should().produceMessage(expectedUser)
+            then(producer).should().produceUser(expectedUser)
         }
     }
 
-//    @Nested
-//    inner class PUTUser {
-//
-//        @Test
-//        fun shouldReturn200WhenPutUser() {
-//            val userJSON = """{
-//                "city": "Leeds"
-//                        }"""
-//
-//            val expectedUser = User("2", "James", 25)
-//
-//            //Given
-//            willDoNothing().given(producer).produceMessage(expectedUser)
-//
-//            //When
-//            val request = restTemplate.postForEntity<String>(
-//                "/user", HttpEntity(userJSON, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
-//            )
-//
-//            //Then
-//            assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
-//            then(producer).should().produceMessage(expectedUser)
-//        }
-//    }
+    @Nested
+    inner class PUTAddress {
+
+        @Test
+        fun shouldReturn200WhenPutAddress() {
+            val addressJSON = """{"city": "Leeds"}"""
+
+            val expectedAddress = Address("Leeds")
+
+            val userId = "123"
+
+            //Given
+            willDoNothing().given(producer).produceAddress(userId, expectedAddress)
+
+            //When
+            val request = restTemplate.postForEntity<String>(
+                "/user/$userId/address",
+                HttpEntity(addressJSON, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
+            )
+
+            //Then
+            assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
+            then(producer).should().produceAddress(userId, expectedAddress)
+        }
+    }
 }
 

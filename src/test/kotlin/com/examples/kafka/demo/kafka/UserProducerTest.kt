@@ -34,7 +34,7 @@ class UserProducerTest {
         val user = User("id", "name", 20)
 
         // When
-        producer.produceMessage(user)
+        producer.produceUser(user)
 
         // Then
         val messageSent: User = someListener.waitForMessage()
