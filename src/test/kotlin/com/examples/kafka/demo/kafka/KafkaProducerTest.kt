@@ -2,12 +2,13 @@ package com.examples.kafka.demo.kafka
 
 import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
-import mu.KotlinLogging
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.test.context.EmbeddedKafka
@@ -15,11 +16,10 @@ import org.springframework.stereotype.Component
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-
 @EmbeddedKafka(ports = [9093], topics = ["users-topic", "address-topic"])
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
-@Import(KafkaProducerTest.UserListener::class)
+@Import(value = [KafkaProducerTest.UserListener::class, KafkaProducerTest.AddressListener::class])
 class KafkaProducerTest {
     @Autowired
     private lateinit var producer: KafkaProducer
@@ -54,8 +54,9 @@ class KafkaProducerTest {
         producer.produceAddress("1", address)
 
         // Then
-        val messageSent: Address = addressListener.waitForMessage()
-        assertThat(messageSent).isEqualTo(address)
+        val (key, actualAddress) = addressListener.waitForMessage()
+        assertThat(key).isEqualTo("1")
+        assertThat(actualAddress).isEqualTo(address)
     }
 
     @Component
@@ -63,9 +64,8 @@ class KafkaProducerTest {
 
         private val messages = mutableListOf<User>()
 
-        @KafkaListener(topics = ["natasa-topic-example"], groupId = "natasa-message-consumer")
+        @KafkaListener(topics = ["users-topic"], groupId = "natasa-message-consumer")
         fun consumer(user: User) {
-            KotlinLogging.logger { }.info { "Message received [$user]" }
             messages.add(user)
         }
 
@@ -83,15 +83,15 @@ class KafkaProducerTest {
     @Component
     class AddressListener {
 
-        private val messages = mutableListOf<Address>()
+        private val messages = mutableListOf<Pair<String, Address>>()
 
         @KafkaListener(topics = ["address-topic"], groupId = "natasa-message-consumer")
-        fun consumer(address: Address) {
-            KotlinLogging.logger { }.info { "Message received [$address]" }
-            messages.add(address)
+        fun consumer(addressRecord: ConsumerRecord<String, Address>) {
+
+            messages.add(Pair(addressRecord.key(), addressRecord.value()))
         }
 
-        fun waitForMessage(): Address {
+        fun waitForMessage(): Pair<String, Address> {
             var counter = 0
             do {
                 if (messages.isNotEmpty()) return messages[0]
