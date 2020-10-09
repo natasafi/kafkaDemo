@@ -8,14 +8,20 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.then
+import org.mockito.BDDMockito.willDoNothing
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.getForEntity
+import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.net.URI
@@ -99,4 +105,57 @@ class MessageControllerTest {
             assertThat(response.body).isEqualTo(user)
         }
     }
+
+    @Nested
+    inner class POSTUser {
+
+        @Test
+        fun shouldReturn200WhenNewUser() {
+            val userJSON = """{
+                "id": "2",
+                "name": "James",
+                "age": 25
+                 }"""
+
+            val expectedUser = User("2", "James", 25)
+
+            //Given
+            willDoNothing().given(producer).produceMessage(expectedUser)
+
+            //When
+            val request = restTemplate.postForEntity<String>(
+                "/user", HttpEntity(userJSON, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
+            )
+
+            //Then
+            assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
+            then(producer).should().produceMessage(expectedUser)
+        }
+    }
+
+//    @Nested
+//    inner class PUTUser {
+//
+//        @Test
+//        fun shouldReturn200WhenPutUser() {
+//            val userJSON = """{
+//                "city": "Leeds"
+//                        }"""
+//
+//            val expectedUser = User("2", "James", 25)
+//
+//            //Given
+//            willDoNothing().given(producer).produceMessage(expectedUser)
+//
+//            //When
+//            val request = restTemplate.postForEntity<String>(
+//                "/user", HttpEntity(userJSON, HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON })
+//            )
+//
+//            //Then
+//            assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
+//            then(producer).should().produceMessage(expectedUser)
+//        }
+//    }
 }
+
