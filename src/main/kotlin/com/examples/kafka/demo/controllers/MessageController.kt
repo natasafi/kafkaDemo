@@ -1,6 +1,7 @@
 package com.examples.kafka.demo.controllers
 
 import com.examples.kafka.demo.kafka.user.KafkaProducer
+import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.repository.UserRepository
 import mu.KotlinLogging
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -48,10 +50,18 @@ class MessageController(
     @PostMapping(value = ["/user"])
     fun postUserJson(@RequestBody user: User): String? {
 
-        producer.produceMessage(user)
+        producer.produceUser(user)
 
         logger.info { "Here's your posted user: $user" }
 
         return "Your user was published successfully"
+    }
+
+    @PutMapping(value = ["/user/{id}/address"])
+    fun putAddress(@PathVariable id: String, @RequestBody address: Address): String? {
+
+        producer.produceAddress(id, address)
+
+        return address.toString()
     }
 }
