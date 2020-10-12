@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.test.context.EmbeddedKafka
@@ -34,14 +33,15 @@ class KafkaProducerTest {
     @DirtiesContext
     fun publishUserMessage() {
         // Given
-        val user = User("id", "name", 20)
+        val expectedUser = User("id", "name", 20)
 
         // When
-        producer.produceUser(user)
+        producer.produceUser(expectedUser)
 
         // Then
-        val messageSent: User = usersListener.waitForMessage()
-        assertThat(messageSent).isEqualTo(user)
+        val (key, actualUser) = usersListener.waitForMessage()
+        assertThat(actualUser).isEqualTo(expectedUser)
+        assertThat(key).isEqualTo(expectedUser.id)
     }
 
     @Test
@@ -59,17 +59,9 @@ class KafkaProducerTest {
         assertThat(actualAddress).isEqualTo(address)
     }
 
-    @Component
-    class UserListener {
-
-        private val messages = mutableListOf<User>()
-
-        @KafkaListener(topics = ["users-topic"], groupId = "natasa-message-consumer")
-        fun consumer(user: User) {
-            messages.add(user)
-        }
-
-        fun waitForMessage(): User {
+    open class KafkaTestListener<K, V> {
+        protected val messages = mutableListOf<Pair<K, V>>()
+        fun waitForMessage(): Pair<K, V> {
             var counter = 0
             do {
                 if (messages.isNotEmpty()) return messages[0]
@@ -78,27 +70,22 @@ class KafkaProducerTest {
             } while (counter < 10)
             throw AssertionError("No message was received")
         }
+
     }
 
     @Component
-    class AddressListener {
+    class UserListener : KafkaTestListener<String, User>() {
 
-        private val messages = mutableListOf<Pair<String, Address>>()
+        @KafkaListener(topics = ["users-topic"], groupId = "natasa-message-consumer")
+        fun consumer(userRecord: ConsumerRecord<String, User>) =
+            messages.add(userRecord.key() to userRecord.value())
+    }
+
+    @Component
+    class AddressListener : KafkaTestListener<String, Address>() {
 
         @KafkaListener(topics = ["address-topic"], groupId = "natasa-message-consumer")
-        fun consumer(addressRecord: ConsumerRecord<String, Address>) {
-
-            messages.add(Pair(addressRecord.key(), addressRecord.value()))
-        }
-
-        fun waitForMessage(): Pair<String, Address> {
-            var counter = 0
-            do {
-                if (messages.isNotEmpty()) return messages[0]
-                else Thread.sleep(1000)
-                counter++
-            } while (counter < 10)
-            throw AssertionError("No message was received")
-        }
+        fun consumer(addressRecord: ConsumerRecord<String, Address>) =
+            messages.add(addressRecord.key() to addressRecord.value())
     }
 }
