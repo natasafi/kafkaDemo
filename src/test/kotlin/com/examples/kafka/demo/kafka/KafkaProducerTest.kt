@@ -30,7 +30,7 @@ class KafkaProducerTest {
     private lateinit var addressListener: AddressListener
 
     @Test
-    @DirtiesContext
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     fun publishUserMessage() {
         // Given
         val expectedUser = User("id", "name", 20)
@@ -45,7 +45,7 @@ class KafkaProducerTest {
     }
 
     @Test
-    @DirtiesContext
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     fun publishAddressMessage() {
         // Given
         val address = Address("Leeds")
