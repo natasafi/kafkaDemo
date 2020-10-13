@@ -1,5 +1,7 @@
 package com.examples.kafka.demo.repository
 
+import com.examples.kafka.demo.models.Address
+import com.examples.kafka.demo.models.User
 import com.examples.kafka.demo.models.createUser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.findById
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
@@ -39,10 +42,12 @@ class UserRepositoryTest @Autowired constructor(
             val actualUsers = userRepository.findAll()
 
             // Then
-            assertThat(actualUsers).isEqualTo(listOf(
-                createUserWithIdOf1(),
-                createUserWithIdOf2()
-            ))
+            assertThat(actualUsers).isEqualTo(
+                listOf(
+                    createUserWithIdOf1(),
+                    createUserWithIdOf2()
+                )
+            )
         }
     }
 
@@ -79,6 +84,25 @@ class UserRepositoryTest @Autowired constructor(
             assertThat(actualUsers).isEqualTo(createUserWithIdOf1())
         }
     }
+
+    @Nested
+    inner class `When updating a user's address searching by id` {
+
+        @Test
+        fun `Then should save the user with the new address`() {
+            // Given
+            val user = createUserWithIdOf1()
+            mongoTemplate.insert(user)
+
+            // When
+            val address = createAddress()
+            userRepository.updateAddressById("1", address)
+            val actualUser = mongoTemplate.findById<User>("1")
+
+            // Then
+            assertThat(actualUser).isEqualTo(user.copy(address = address))
+        }
+    }
 }
 
 private fun createUserWithIdOf1() =
@@ -94,5 +118,8 @@ private fun createUserWithIdOf2() =
         name = "Phillip Fry",
         age = 25
     )
+
+private fun createAddress() = Address(city = "Leeds")
+
 
 

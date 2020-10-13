@@ -11,5 +11,7 @@ interface UserRepository : MongoRepository<User, String> {
 
     fun findUsersByName(name: String?): List<User>
 
-//    fun updateAddressById(id: String): Pair<User, Address>
+    fun updateAddressById(id: String, address: Address) {
+        findById(id).map { user -> user.copy(address = address) }
+    }
 }
