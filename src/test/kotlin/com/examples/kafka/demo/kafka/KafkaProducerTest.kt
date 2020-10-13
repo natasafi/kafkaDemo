@@ -7,18 +7,25 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Import
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.stereotype.Component
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@EmbeddedKafka(ports = [9093], topics = ["users-topic", "address-topic"])
+
+@EmbeddedKafka(ports = [9093])
 @ExtendWith(SpringExtension::class)
-@SpringBootTest
-@Import(value = [KafkaProducerTest.UserListener::class, KafkaProducerTest.AddressListener::class])
+@SpringBootTest(
+    classes = [
+        KafkaProducer::class,
+        KafkaAutoConfiguration::class,
+        KafkaProducerTest.UserListener::class,
+        KafkaProducerTest.AddressListener::class
+    ]
+)
 class KafkaProducerTest {
     @Autowired
     private lateinit var producer: KafkaProducer
@@ -30,7 +37,7 @@ class KafkaProducerTest {
     private lateinit var addressListener: AddressListener
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    @DirtiesContext
     fun publishUserMessage() {
         // Given
         val expectedUser = User("id", "name", 20)
@@ -45,7 +52,7 @@ class KafkaProducerTest {
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    @DirtiesContext
     fun publishAddressMessage() {
         // Given
         val address = Address("Leeds")
