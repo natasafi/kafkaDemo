@@ -12,4 +12,11 @@ Fork the repository and copy the URL. Navigate into your desktop from your termi
 
 Once you open the local directory on the text editor build the project localy with Gradle
 
--WIP-
+To run the project localy, on your terminal direct to the project file
+
+* cd ~/src/deployment
+
+and run 
+
+* docker-compose -f docker-compose.yaml up 
+
