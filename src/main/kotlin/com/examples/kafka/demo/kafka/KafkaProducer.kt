@@ -21,9 +21,9 @@ class KafkaProducer(
         userTemplate.send(USERS_NAME, user.id, user)
     }
 
-    fun produceAddress(userId: String, expectedAddress: Address) {
-        logger.info { "Your address is being produced: $expectedAddress with $userId" }
-        addressTemplate.send(ADDRESS_NAME, userId, expectedAddress)
+    fun produceAddress(userId: String, address: Address) {
+        logger.info { "Your address is being produced: $address with $userId" }
+        addressTemplate.send(ADDRESS_NAME, userId, address)
     }
 
 }

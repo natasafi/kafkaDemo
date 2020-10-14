@@ -48,7 +48,7 @@ class MessageController(
     }
 
     @PostMapping(value = ["/user"])
-    fun postUserJson(@RequestBody user: User): String? {
+    fun postUser(@RequestBody user: User): String? {
 
         producer.produceUser(user)
 

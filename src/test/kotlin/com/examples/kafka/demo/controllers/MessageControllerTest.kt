@@ -12,8 +12,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.then
 import org.mockito.BDDMockito.willDoNothing
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -116,7 +114,7 @@ class MessageControllerTest {
 
         @Test
         fun shouldReturn200WhenNewUser() {
-            val userJSON = """
+            val actualUser = """
                  {
                   "id": "2",
                   "name": "James",
@@ -129,7 +127,7 @@ class MessageControllerTest {
             willDoNothing().given(producer).produceUser(expectedUser)
 
             //When
-            val request = restTemplate.postForEntity<String>("/user", jsonEntity(userJSON))
+            val request = restTemplate.postForEntity<String>("/user", jsonEntity(actualUser))
 
             //Then
             assertThat(request.statusCode).isEqualTo(HttpStatus.OK)
@@ -142,7 +140,7 @@ class MessageControllerTest {
 
         @Test
         fun shouldReturn200WhenPutAddress() {
-            val addressJSON = """{"city": "Leeds"}"""
+            val actualAddress = """{"city": "Leeds"}"""
             val expectedAddress = Address("Leeds")
             val userId = "123"
 
@@ -150,7 +148,7 @@ class MessageControllerTest {
             willDoNothing().given(producer).produceAddress(userId, expectedAddress)
 
             //When
-            val body = addressJSON
+            val body = actualAddress
             val request = restTemplate.exchange(
                 "/user/$userId/address", HttpMethod.PUT, jsonEntity(body), String::class.java
             )

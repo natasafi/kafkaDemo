@@ -56,13 +56,14 @@ class KafkaProducerTest {
     fun publishAddressMessage() {
         // Given
         val address = Address("Leeds")
+        val userId = "1"
 
         // When
-        producer.produceAddress("1", address)
+        producer.produceAddress(userId, address)
 
         // Then
         val (key, actualAddress) = addressListener.waitForMessage()
-        assertThat(key).isEqualTo("1")
+        assertThat(key).isEqualTo(userId)
         assertThat(actualAddress).isEqualTo(address)
     }
 
