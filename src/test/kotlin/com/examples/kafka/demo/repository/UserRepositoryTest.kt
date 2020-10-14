@@ -85,24 +85,24 @@ class UserRepositoryTest @Autowired constructor(
         }
     }
 
-//    @Nested
-//    inner class `When updating a user's address searching by id` {
-//
-//        @Test
-//        fun `Then should save the user with the new address`() {
-//            // Given
-//            val user = createUserWithIdOf1()
-//            mongoTemplate.insert(user)
-//
-//            // When
-//            val address = createAddress()
-//            userRepository.updateAddressById("1", address)
-//            val actualUser = mongoTemplate.findById<User>("1")
-//
-//            // Then
-//            assertThat(actualUser).isEqualTo(user.copy(address = address))
-//        }
-//    }
+    @Nested
+    inner class `When updating a user's address searching by id` {
+
+        @Test
+        fun `Then should save the user with the new address`() {
+            // Given
+            val user = createUserWithIdOf1()
+            mongoTemplate.insert(user)
+
+            // When
+            val address = createAddress()
+            userRepository.updateAddressById("1", address)
+            val actualUser = mongoTemplate.findById<User>("1")
+
+            // Then
+            assertThat(actualUser).isEqualTo(user.copy(address = address))
+        }
+    }
 }
 
 private fun createUserWithIdOf1() =
