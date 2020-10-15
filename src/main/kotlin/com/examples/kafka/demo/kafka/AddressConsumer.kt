@@ -19,5 +19,4 @@ class AddressConsumer(val userRepository: UserRepository) {
 
         userRepository.updateAddressById(record.key(), record.value())
     }
-
 }
