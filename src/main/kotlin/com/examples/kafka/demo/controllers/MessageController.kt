@@ -3,6 +3,7 @@ package com.examples.kafka.demo.controllers
 import com.examples.kafka.demo.kafka.KafkaProducer
 import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
+import com.examples.kafka.demo.models.UserResponse
 import com.examples.kafka.demo.repository.UserRepository
 import mu.KotlinLogging
 import org.springframework.http.ResponseEntity
@@ -26,21 +27,21 @@ class MessageController(
 ) {
     @GetMapping("/users")
     fun getUsers(@RequestParam(value = "name", required = false) name: String?): ResponseEntity<List<User>> {
+
         val users: List<User> =
             name?.takeIf { it.isNotEmpty() }?.let { userRepository.findUsersByName(it) } ?: userRepository.findAll()
 
         logger.info { "Here's the users: $users" }
 
         return ResponseEntity.ok(users)
-
     }
 
     @GetMapping("/user/{id}")
-    fun getUser(@PathVariable id: String): ResponseEntity<User> {
+    fun getUser(@PathVariable id: String): ResponseEntity<UserResponse> {
 
         logger.info { "Here's the id: $id" }
 
-        val userById = userRepository.findUserById(id)
+        val userById = userRepository.findUserById(id).toUserView()
 
         logger.info { "Here's the user: $userById" }
 
@@ -64,4 +65,12 @@ class MessageController(
 
         return address.toString()
     }
+
+    fun User.toUserView() = UserResponse(
+        id = id,
+        name = name,
+        address = address,
+        age = age,
+        email = email
+    )
 }
