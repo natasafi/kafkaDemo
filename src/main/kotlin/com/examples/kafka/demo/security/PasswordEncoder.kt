@@ -1,20 +1,26 @@
 package com.examples.kafka.demo.security
 
-import com.examples.kafka.demo.models.User
+import mu.KotlinLogging
 import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
 
+private val logger = KotlinLogging.logger { }
+
 @Service
-class PasswordEncoder(val user: User) {
-    val password: String = user.password
+class PasswordEncoder() {
 
-    val hashedPassword: String = BCrypt.hashpw(password, BCrypt.gensalt("ek fevgein de tameloumenon",10))
+    fun hashPassword(password: String): String {
 
-    fun checkPassword(password: String) {
+        val saltedPassword = "ek fevgein$password de tameloumenon"
+
+        return BCrypt.hashpw(saltedPassword, BCrypt.gensalt(10))
+    }
+
+    fun checkPassword(password: String, hashedPassword: String) {
         if (BCrypt.checkpw(password, hashedPassword)) {
-            println("Password accepted.")
+            logger.info("Password accepted.")
         } else {
-            println("Password denied.")
+            logger.info("Password denied.")
         }
     }
 }
