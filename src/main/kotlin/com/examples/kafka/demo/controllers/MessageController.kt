@@ -68,8 +68,6 @@ class MessageController(
         val userByEmail = userRepository.findUserByEmail(user.email)
 
         logger.info { "Here's your posted user: $user" }
-        logger.info { user.password }
-        logger.info { userByEmail.password }
 
         return passwordEncoder.checkPassword(user.password, userByEmail.password)
 
