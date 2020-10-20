@@ -15,6 +15,8 @@ interface UserRepository : MongoRepository<User, String>, AddressFunctions {
     fun findUserById(id: String): User
 
     fun findUsersByName(name: String?): List<User>
+
+    fun findUserByEmail(email: String): User
 }
 
 interface AddressFunctions {

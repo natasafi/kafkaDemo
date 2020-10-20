@@ -3,8 +3,10 @@ package com.examples.kafka.demo.controllers
 import com.examples.kafka.demo.kafka.KafkaProducer
 import com.examples.kafka.demo.models.Address
 import com.examples.kafka.demo.models.User
+import com.examples.kafka.demo.models.UserLogin
 import com.examples.kafka.demo.models.UserResponse
 import com.examples.kafka.demo.repository.UserRepository
+import com.examples.kafka.demo.security.PasswordEncoder
 import mu.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,7 +25,8 @@ private val logger = KotlinLogging.logger { }
 @RequestMapping("/")
 class MessageController(
     private val producer: KafkaProducer,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
     @GetMapping("/users")
     fun getUsers(@RequestParam(value = "name", required = false) name: String?): ResponseEntity<List<UserResponse>> {
@@ -59,6 +62,19 @@ class MessageController(
         return "Your user was published successfully"
     }
 
+    @PostMapping(value = ["/login"])
+    fun postUserLogin(@RequestBody user: UserLogin) {
+
+        val userByEmail = userRepository.findUserByEmail(user.email)
+
+        logger.info { "Here's your posted user: $user" }
+        logger.info { user.password }
+        logger.info { userByEmail.password }
+
+        return passwordEncoder.checkPassword(user.password, userByEmail.password)
+
+    }
+
     @PutMapping(value = ["/user/{id}/address"])
     fun putAddress(@PathVariable id: String, @RequestBody address: Address): String? {
 
@@ -73,5 +89,10 @@ class MessageController(
         address = address,
         age = age,
         email = email
+    )
+
+    fun User.toUserLogin() = UserLogin(
+        email = email,
+        password = password
     )
 }
